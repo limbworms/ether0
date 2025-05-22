@@ -12,9 +12,9 @@ async function send(amount){
 
     // console.dir(amount)
     const wei =  web3.utils.toWei(amount, "ether");
-    var bnWei = new BN(wei, 16);
-    console.dir(wei)
-    console.dir(web3.utils.toHex(wei))
+    // var bnWei = new BN(wei, 16);
+    // console.dir(wei)
+    // console.dir(web3.utils.toHex(wei))
 
 
     if(accounts.length>0){

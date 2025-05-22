@@ -1,33 +1,132 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react'
+import { ethers, parseUnits } from "ethers";
+import { BN } from "bn.js";
+import { Web3 } from "web3";
+
+import Account from './components/Account'
+import EthName from './components/EthName'
+import Answer from './components/Answer'
+import AnswerForm from './components/AnswerForm'
+// import { JazzSigil } from './components/JazzSigil'
+
+import readin from "./assets/api/answers"
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [accounts, setAccounts] = useState([])
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  const [isLoading, setLoading] = useState(true)
+  const [answers, setAnswers] = useState([])
+
+
+  async function connectWallet (){
+    let _account = await window.ethereum.request({ method: "eth_requestAccounts" });
+    console.log(_account)
+    setAccounts(_account);
+  }
+
+  async function resolver (responsePayload) {
+    const payload = await responsePayload;
+    setLoading(false);
+    return payload
+  }
+
+  function clearAccount (){
+    // setAccounts([]);
+    // console.log('clearAccount');
+  };
+
+
+  useEffect(function(){
+    setLoading(false);
+  }, [isLoading])
+
+  // useEffect(() => {
+  //   console.log(answers)
+  // }, [])
+
+
+  useEffect(function(){
+    async function fetchData() {
+
+      if (accounts.length>0){
+        setIsLoggedIn(true);
+      } else {
+        setIsLoggedIn(false);
+      }
+
+      window.ethereum.on('disconnect', function(_account) {
+          console.log('there')
+          setAccounts([])
+          setIsLoggedIn(false)
+        });
+    }
+    console.log('zhere')
+    fetchData();
+    // window.ethereum.off('disconnect', clearAccount);
+
+  }, [accounts, isLoggedIn])
+
+
+
+
+// Handle when we login to account
+  useEffect(() => {
+    const request = new Request("", {
+      method: "GET",
+    });
+
+    //did we log in already
+    async function fetchData() {
+      let _account = await window.ethereum.request({ method: "eth_accounts" });
+      setAccounts(_account);
+      window.ethereum.on("accountsChanged", function (_account) {
+        console.log('here')
+        setAccounts(_account)
+      });
+
+      const res = readin(request)
+      const _answers = await resolver(res.json());
+      setAnswers(_answers)
+    };
+    fetchData();
+
+  }, [])
+
+
+    var answersArea = (
+      <div className="loadingAnswers"> LOADING... </div>
+    )    
+
+    if(!isLoading){
+        answersArea = answers.map((values, index) => {
+          return <Answer key={index+1} id={index+1} number={index+1} answer={values} isLoggedIn={isLoggedIn}/>
+        })
+
+    } else{
+          <div className="loadingAnswers"> LOADED! </div>
+    }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <header style={{display: "flex", flexDirection: "row", flex: "0 0 40", padding: "4 8", alignItems: "center", justifyContent: "center"}}>
+        <h1 style={{margin: "auto", marginTop: 12,}}>hi</h1>
+
+        <Account  accounts={accounts} 
+                  isLoggedIn={isLoggedIn} 
+                  connect={connectWallet}>  </Account>
+      </header>
+
+      <section className="answers">
+            <div  className="column-container"
+            style={{display: "flex", flexDirection: "column",}}>
+
+              {answersArea}
+
+            </div>
+      </section>
+
     </>
   )
 }
