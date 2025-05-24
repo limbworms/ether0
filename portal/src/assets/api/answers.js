@@ -16,7 +16,10 @@ const answers = [
 
 
 
-
+async function resolver (responsePayload) {
+  const payload = await responsePayload;
+  return payload
+}
 
 function writeResponse(body, options){
     const myBlob = new Blob([body]);
@@ -32,64 +35,72 @@ export default function handler(req) {
   // const myBlob = new Blob();
   // const res = new Response(myBlob);
 
+  // console.dir(req)
+  // const _req = resolver(req.body.json())
+
   // if sent via a form, e.g. the reply form
+  console.dir(req)
+  // console.log("@@@@@@@@@@@@@@@")
+
   if (req.method === "POST") {
-    
-    const { signedMessage, confirmationMessage, account, reply="", questionId=1 } = req.body
+    const resolved = resolver(req)
+    resolved.then(response => response.json())
+    .then((data) => {
 
-    if (signedMessage !== null && confirmationMessage !== null && account !== null) {
-      // get account from the confirmation message
-      // and signed message
-      const recoveredAccount = Web3.eth.accounts.recover(confirmationMessage, signedMessage)
+      console.log(data)
 
-      // check if account is same
-      if (account.toLowerCase() === recoveredAccount.toLowerCase()) {  
-        // yep, so render reply
-        // you would usually save to a database here
-        let newReply = markdown.render(reply)
-        
-        // return all good
-        // res
-        //   .status(200)
-        //   .json({ account, reply: newReply, questionId, answerId: 3 })
+      const { signedMessage, confirmationMessage, account, reply="", questionId=1 } = data
 
-          opt = { status: 200,
-            account: account, 
-            reply: newReply, 
-            questionId: questionId, 
-            answerId: 3 }
+      if (signedMessage !== null && confirmationMessage !== null && account !== null) {
+        // get account from the confirmation message
+        // and signed message
+        const recoveredAccount = Web3.eth.accounts.recover(confirmationMessage, signedMessage)
 
-      const res = writeResponse(opt);
-      return res
+        // check if account is same
+        if (account.toLowerCase() === recoveredAccount.toLowerCase()) {  
+            let newReply = markdown.render(reply)
+            
+            opt = { status: 200,
+              account: account, 
+              reply: newReply, 
+              questionId: questionId, 
+              answerId: 3 }
 
-      } else {  
-        // incorrect account
-        // res
-        //   .status(401)
-        //   .json({ error: "incorrect account" })
+          const res = writeResponse(opt);
+          return res
 
-        
-        opt=  { status: 401,
-            error: "incorrect account" 
-          }
-      const res = writeResponse(opt);
-      return res
+        } else {  
+          // incorrect account
+          // res
+          //   .status(401)
+          //   .json({ error: "incorrect account" })
+
+          
+          opt=  { status: 401,
+              error: "incorrect account" 
+            }
+        console.log('111')
+        const res = writeResponse(opt);
+        return res
 
       }
-    } else {
-      // need to sign that message!
-      // res
-        // .status(401)
-        // .json({ error: "need to sign message" })
 
-        
-          opt = { status: 401,
-            error: "need to sign message" 
-          }
-      const res = writeResponse(opt);
-      return res
+      } else {
+        // need to sign that message!
+        // res
+          // .status(401)
+          // .json({ error: "need to sign message" })
 
-    }
+          
+            opt = { status: 401,
+              error: "need to sign message" 
+            }
+        console.log('111')
+        const res = writeResponse(opt);
+        return res
+
+      }});
+
   } else {
 
     // if fetched normally using fetch()

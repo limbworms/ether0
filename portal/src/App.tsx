@@ -22,7 +22,6 @@ function App() {
 
   async function connectWallet (){
     let _account = await window.ethereum.request({ method: "eth_requestAccounts" });
-    console.log(_account)
     setAccounts(_account);
   }
 
@@ -32,10 +31,11 @@ function App() {
     return payload
   }
 
-  function clearAccount (){
-    // setAccounts([]);
-    // console.log('clearAccount');
-  };
+  function writeRequest(body, options){
+    // const myBlob = new Blob([body]);
+    const req = new Request("", options);
+    return req
+}
 
 
   useEffect(function(){
@@ -57,12 +57,10 @@ function App() {
       }
 
       window.ethereum.on('disconnect', function(_account) {
-          console.log('there')
           setAccounts([])
           setIsLoggedIn(false)
         });
     }
-    console.log('zhere')
     fetchData();
     // window.ethereum.off('disconnect', clearAccount);
 
@@ -73,19 +71,24 @@ function App() {
 
 // Handle when we login to account
   useEffect(() => {
-    const request = new Request("", {
-      method: "GET",
-    });
 
     //did we log in already
     async function fetchData() {
       let _account = await window.ethereum.request({ method: "eth_accounts" });
       setAccounts(_account);
+
       window.ethereum.on("accountsChanged", function (_account) {
-        console.log('here')
         setAccounts(_account)
       });
 
+      const opt = {      
+        headers: { 'Content-Type': 'application/json' },
+        method: "GET",}
+
+      const request = writeRequest(JSON.stringify({}),opt)
+
+      console.dir(request)
+      
       const res = readin(request)
       const _answers = await resolver(res.json());
       setAnswers(_answers)
@@ -100,8 +103,8 @@ function App() {
     )    
 
     if(!isLoading){
-        answersArea = answers.map((values, index) => {
-          return <Answer key={index+1} id={index+1} number={index+1} answer={values} isLoggedIn={isLoggedIn}/>
+        answersArea = answers.slice(0).reverse().map((values, index) => {
+          return <Answer key={answers.length-index} id={answers.length-index} number={answers.length-index} answer={values} isLoggedIn={isLoggedIn}/>
         })
 
     } else{
@@ -110,8 +113,8 @@ function App() {
 
   return (
     <>
-      <header style={{display: "flex", flexDirection: "row", flex: "0 0 40", padding: "4 8", alignItems: "center", justifyContent: "center"}}>
-        <h1 style={{margin: "auto", marginTop: 12,}}>hi</h1>
+      <header style={{display: "flex", flexDirection: "row", flex: "0 0 40", padding: "4 8", alignItems: "center", justifyContent: "center", marginBottom: 50}}>
+        <h1 style={{margin: "auto", marginTop: 12, }}>hi</h1>
 
         <Account  accounts={accounts} 
                   isLoggedIn={isLoggedIn} 
@@ -119,10 +122,15 @@ function App() {
       </header>
 
       <section className="answers">
-            <div  className="column-container"
-            style={{display: "flex", flexDirection: "column",}}>
-
+            <div  className="row-container" style={{display: "flex", flexDirection: "row",}}>
+            <div  className="column-container" style={{display: "flex", flexDirection: "column", margin: "auto"}}>
+            </div>
+            <div  className="column-container" style={{display: "flex", flexDirection: "column", margin: "auto"}}>
+            </div>
+            <div  className="column-container" style={{display: "flex", flexDirection: "column", margin: "auto"}}>
+              <AnswerForm accounts={accounts} setAnswers={setAnswers} isLoggedIn={isLoggedIn} />
               {answersArea}
+            </div>
 
             </div>
       </section>

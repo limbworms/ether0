@@ -21,7 +21,7 @@ const Account = function ({ accounts, isLoggedIn, connect }) {
 
           // <NetworkIcon network="base" variant="mono" size="64" color="#019469"/>
 
-  console.log(isLoggedIn)
+  // console.log(isLoggedIn)
 
   if(accounts[0]){
     // if(accounts.length>0){let truncAddress = accounts[0].slice(0,4) + "..." + accounts[0].slice(-4)}

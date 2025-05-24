@@ -1,10 +1,26 @@
 import { useState, useEffect } from "react"
 import { Web3 } from 'web3';
 
+
+import { getDefaultProvider } from 'ethers'
+
+// import { useEnsName } from 'wagmi'
+// import { useEnsAddress, useEnsName } from 'wagmi';
+// import { mainnet } from 'wagmi/chains'
+
+// import ENS, { getEnsAddress } from '@ensdomains/ensjs';
 import { JazzSigil, BlockSigil } from './Sigils'
 
+// const ens = useEnsName({address: '0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5',})
+// const provider = getDefaultProvider() 
+// async function fetchENS(address){
+//   const names = await provider.lookupAddress("0xb8c2C29ee19D8307cb7255e1Cd9CbDE883A267d5");
+//   console.dir(names)
+// }
+// fetchENS();
 
-// seed={jsNumberForAddress('0x1111111111111111111111111111111111111111')} />
+
+
 function EnsName(props) {
   // TODO!
   // get the address from outside
@@ -16,11 +32,16 @@ function EnsName(props) {
 
   if(props.address!==null){
     let truncAddress = props.address.toString().slice(0,7) + "..." + props.address.toString().slice(-4)
-    console.dir(props.address)
+    // console.dir(props.address)
     let icon = (
         <JazzSigil address={props.address.toString()}/>
         // <BlockSigil address={props.address.toString()}/>
       )
+
+
+
+
+
 
     return (
       <div className="eth-name" style={{display: "flex", flexDirection: "row", flex: "0 0 40", padding: "4 8"}}>

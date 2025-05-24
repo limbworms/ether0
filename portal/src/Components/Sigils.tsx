@@ -11,7 +11,7 @@ import { blo, bloSvg } from "blo";
 
 export function JazzSigil(props) {
   // console.dir(address.address)
-  console.log(jsNumberForAddress(props.address))
+  // console.log(jsNumberForAddress(props.address))
   return (
 
     <Jazzicon diameter={18} seed={jsNumberForAddress(props.address)} />

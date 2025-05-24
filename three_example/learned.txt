@@ -1,0 +1,58 @@
+learned:
+
+1. hardhat to for, compile, and test the .sol contracts.
+2. npx hardhat node  to run a node for our test network.
+3. while node runs, npx hardhat run scripts/deploy.js --network localhost
+	this deploys (and records) our smart contracts. notably, the modern working code is:
+
+        const NftSale = await hre.ethers.getContractFactory("NftSale");
+        const nftsaleInstance = await NftSale.deploy();
+        await nftsaleInstance.waitForDeployment();
+
+        console.log("Contract deployed to:", nftsaleInstance.target);
+
+	this also specifies to point at localhost.
+
+
+4. in the wallet, add localhost as the target RPC network
+5. in the wallet, use a private key from step 2 to form a test net compatible wallet in 4.
+
+6. Usage changes
+	don't use eth.personal.sign
+
+	do:
+
+	  const msg = `0x${Buffer.from(sharedMessage, "utf8").toString("hex")}`
+      const sign = await ethereum.request({
+        method: "personal_sign",
+        params: [msg, accounts[0]],
+      })
+
+    recieving still works ok:
+
+      const msg = `0x${Buffer.from(sharedMessage, "utf8").toString("hex")}`
+      const account = web3.eth.accounts.recover(msg, body.signature);
+
+
+
+7. calling contracts. 
+	.first load the contract:
+
+		const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+		const contract = new web3.eth.Contract(NftSale.abi, contractAddress)
+
+		use the ABI formed by hardhat compilation
+
+	.then we export the contact and its "message" to broadcast when signing for it
+
+		const sharedMessage = "The jpegs don't do anything."
+		export { web3, contract, contractAddress, sharedMessage };
+
+	.call contracts like so:
+
+		contract.methods.hasAccess().call({ from: accounts[0] })
+        	.then(setHasAccess)
+
+    	our contract has the method hasAccess, we call it injecting the params
+    	we can await or .then(). Passing this directly into a hook works fine (boolean hook).
+

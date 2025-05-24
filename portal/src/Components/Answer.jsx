@@ -13,7 +13,7 @@ export function Answer(props) {
 
   return (
 
-    <div className="content" id={props.id}>
+    <div className="content" id={props.id} style={{top: 0}}>
       <div id="popBoxTitle" className="headerTitle">
         <div className="topTitleLine"></div>
         <div className="titleLines"></div>
